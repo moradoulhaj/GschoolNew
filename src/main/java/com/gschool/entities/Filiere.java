@@ -1,15 +1,13 @@
 package com.gschool.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Table(name = "filiere")
 public class Filiere {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
 
@@ -21,7 +19,7 @@ public class Filiere {
 
     @ColumnDefault("0")
     @Column(name = "nbr_etudiant")
-    private Integer nbrEtudiant;
+    private Integer nbrEtudiant = 0;
 
     public Integer getId() {
         return id;
