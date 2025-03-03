@@ -18,16 +18,18 @@ public class LoginController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         // Authenticate the user
         boolean isAuthenticated = userService.authenticate(loginRequest.getLogin(), loginRequest.getPassword());
-
+        System.out.println(isAuthenticated);
         if (isAuthenticated) {
             // Login successful
             return ResponseEntity.ok("Login successful");
         } else {
             // Login failed
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid login or password");
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body("Invalid login or password"); // Custom error message
         }
     }
 }
