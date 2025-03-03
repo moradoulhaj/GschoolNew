@@ -50,15 +50,17 @@ public class UserService {
         userRepository.deleteById(id);
     }
     // Authenticate a user (login)
-    public boolean authenticate(String login, String password) {
+    public User authenticate(String login, String password) {
         Optional<User> userOptional = userRepository.findByLogin(login);
 
         if (userOptional.isPresent()) {
             User user = userOptional.get();
             // Compare the provided password with the hashed password in the database
-            return passwordEncoder.matches(password, user.getPassword());
+            if(passwordEncoder.matches(password, user.getPassword())){
+                return user;
+            }
         }
 
-        return false; // User not found
+        return null; // User not found
     }
 }
