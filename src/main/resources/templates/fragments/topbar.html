@@ -1,0 +1,16 @@
+<!-- fragments/topbar.html -->
+<div th:fragment="topbar(user)">
+    <div class="topbar">
+        <!-- Left Side: Gshool -->
+        <div class="left-section">
+            <span class="logo">Gshool</span>
+        </div>
+
+        <!-- Right Side: Welcome Message and Today's Date -->
+        <div class="right-section">
+            <span class="user-info">Welcome, <span th:text="${user.nom}">User</span>!</span>
+            <span class="date" th:text="${#dates.format(#dates.createNow(), 'dd MMMM yyyy')}">Today's Date</span>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+</div>

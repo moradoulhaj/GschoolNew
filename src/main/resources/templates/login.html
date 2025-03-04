@@ -130,7 +130,6 @@
 </div>
 
 <script>
-    // Submit the login form via AJAX
     $('#loginForm').submit(function (event) {
         event.preventDefault();
 
@@ -154,6 +153,11 @@
                 // Hide error message and show success message
                 $('#errorMessage').hide();
                 $('#successMessage').show();
+
+                // Redirect to the dashboard after 1 second
+                setTimeout(function () {
+                    window.location.href = '/dashboard';
+                }, 1000);
             },
             error: function () {
                 // Hide success message and show error message
@@ -162,6 +166,7 @@
             }
         });
     });
+
 </script>
 </body>
 </html>

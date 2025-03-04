@@ -2,6 +2,7 @@ package com.gschool.controller.web;
 
 import com.gschool.entities.User;
 import com.gschool.service.UserService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,24 +23,13 @@ public class LoginController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
-        // Authenticate the user
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpSession session) {
         User user = userService.authenticate(loginRequest.getLogin(), loginRequest.getPassword());
 
         if (user != null) {
-            // Create response excluding the password
-            Map<String, Object> response = new HashMap<>();
-            response.put("message", "Login successful");
-            response.put("user", Map.of(
-                    "id", user.getId(),
-                    "nom", user.getNom(),
-                    "prenom", user.getPrenom(),
-                    "login", user.getLogin()
-            ));
-
-            return ResponseEntity.ok(response);
+            session.setAttribute("user", user); // Store user in session
+            return ResponseEntity.ok(Map.of("message", "Login successful"));
         } else {
-            // Login failed
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("message", "Invalid login or password"));

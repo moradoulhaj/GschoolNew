@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Filières</title>
+    <link rel="stylesheet" href="/css/styles.css"> <!-- Optional CSS -->
+</head>
+<body>
+<h2>Gestion des Filières</h2>
+
+<button onclick="loadFilieres()">Actualiser</button>
+
+<table border="1">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Code</th>
+        <th>Libellé</th>
+        <th>Nombre d'Étudiants</th>
+    </tr>
+    </thead>
+    <tbody id="filieresTableBody">
+    <tr><td colspan="4">Chargement des filières...</td></tr>
+    </tbody>
+</table>
+
+<script>
+    function loadFilieres() {
+        fetch("/api/filieres")
+            .then(response => response.json())
+            .then(data => {
+                let tableBody = document.getElementById("filieresTableBody");
+                tableBody.innerHTML = ""; // Clear existing content
+
+                data.forEach(filiere => {
+                    let row = `<tr>
+                            <td>${filiere.id}</td>
+                            <td>${filiere.code}</td>
+                            <td>${filiere.libelle}</td>
+                            <td>${filiere.nbrEtudiant}</td>
+                        </tr>`;
+                    tableBody.innerHTML += row;
+                });
+            })
+            .catch(error => {
+                console.error("Erreur lors du chargement des filières:", error);
+                document.getElementById("filieresTableBody").innerHTML =
+                    "<tr><td colspan='4'>Erreur lors du chargement.</td></tr>";
+            });
+    }
+
+    document.addEventListener("DOMContentLoaded", loadFilieres);
+</script>
+</body>
+</html>

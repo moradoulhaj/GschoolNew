@@ -1,0 +1,38 @@
+<!-- fragments/etudiant.html -->
+<div th:fragment="etudiant">
+    <h1>Étudiants</h1>
+    <p>Welcome to the Étudiants section. Manage student information here.</p>
+    <div class="student-list">
+        <h2>Liste des Étudiants</h2>
+        <table>
+            <thead>
+            <tr>
+                <th>#</th> <!-- Auto-incremented index -->
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>CNE</th>
+                <th>Filière</th>
+                <th>Photo</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- Loop through the list of students with stat.index -->
+            <tr th:each="etudiant, stat : ${etudiants}">
+                <td th:text="${stat.count}">1</td> <!-- Auto-incremented index -->
+                <td th:text="${etudiant.nom}">Doe</td>
+                <td th:text="${etudiant.prenom}">John</td>
+                <td th:text="${etudiant.cne}">A123456</td>
+                <td th:text="${etudiant.filiere.libelle}">Informatique</td>
+                <td><img th:src="${etudiant.photo}" alt="Photo" width="50"></td>
+                <td>
+                    <!-- Edit Button -->
+                    <button class="btn btn-edit" th:onclick="'openEditModal(' + ${etudiant.id} + ')'">Edit</button>
+                    <!-- Delete Button -->
+                    <button class="btn btn-delete" th:onclick="'deleteStudent(' + ${etudiant.id} + ')'">Delete</button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
