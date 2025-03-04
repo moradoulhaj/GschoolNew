@@ -1,4 +1,4 @@
-package com.gschool.controller;
+package com.gschool.controller.web;
 
 import com.gschool.entities.Student;
 import com.gschool.service.StudentService;

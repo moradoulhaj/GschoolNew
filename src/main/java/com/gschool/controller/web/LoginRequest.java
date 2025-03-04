@@ -1,4 +1,4 @@
-package com.gschool.controller;
+package com.gschool.controller.web;
 
 public class LoginRequest {
     private String login;

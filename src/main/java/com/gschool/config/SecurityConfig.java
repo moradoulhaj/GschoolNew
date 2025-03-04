@@ -4,10 +4,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
-import static org.springframework.security.config.Customizer.withDefaults;
+import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
@@ -21,12 +19,12 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // Disable CSRF protection
+                .csrf(csrf -> csrf.disable()) // Disable CSRF (use cautiously in production)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/**").permitAll() // Allow access to /api/login
-                        .anyRequest().authenticated() // Require authentication for all other endpoints
+                        .anyRequest().permitAll()  // 🚀 Allow all requests, disabling authentication
                 )
-                .httpBasic(withDefaults()); // Enable Basic Authentication (optional)
+                .formLogin(form -> form.disable()) // ❌ Disable default login page
+                .httpBasic(httpBasic -> httpBasic.disable()); // ❌ Disable Basic Authentication
 
         return http.build();
     }

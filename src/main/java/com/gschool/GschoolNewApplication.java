@@ -9,4 +9,5 @@ public class GschoolNewApplication extends SpringBootServletInitializer {
     public static void main(String[] args) {
         SpringApplication.run(GschoolNewApplication.class, args);
     }
+
 }
