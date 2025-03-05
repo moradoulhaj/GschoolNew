@@ -1,5 +1,6 @@
 package com.gschool.controller.ui;
 
+import com.gschool.entities.Filiere;
 import com.gschool.entities.Student;
 import com.gschool.entities.User;
 import com.gschool.service.FiliereService;
@@ -16,10 +17,12 @@ import java.util.List;
 public class UiDashboardController {
 
     private final StudentService etudiantService;
+    private final FiliereService filiereService;
 
     // Inject EtudiantService via constructor
-    public UiDashboardController(StudentService etudiantService) {
+    public UiDashboardController(StudentService etudiantService , FiliereService filiereService ) {
         this.etudiantService = etudiantService;
+        this.filiereService = filiereService;
     }
 
     @GetMapping("/dashboard")
@@ -32,6 +35,7 @@ public class UiDashboardController {
 
         ModelAndView modelAndView = new ModelAndView("dashboard");
         modelAndView.addObject("user", user);
+        modelAndView.addObject("section", "accueil"); // Pass the section name
         return modelAndView;
     }
 
@@ -50,19 +54,26 @@ public class UiDashboardController {
     }
 
     @GetMapping("/dashboard/filieres")
-    public ModelAndView filieres(HttpSession session) {
+    public ModelAndView filieres(HttpSession session, Model model) {
         User user = (User) session.getAttribute("user");
 
+        // Redirect to login if the user is not logged in
         if (user == null) {
-            return new ModelAndView("redirect:/login"); // Redirect if not logged in
+            return new ModelAndView("redirect:/login");
         }
 
+        // Fetch filières from the database
+        List<Filiere> filieres = filiereService.getAllFilieres();
+
+        // Add filières to the model
+        model.addAttribute("filieres", filieres);
+
+        // Create ModelAndView and add necessary objects
         ModelAndView modelAndView = new ModelAndView("dashboard");
         modelAndView.addObject("user", user);
         modelAndView.addObject("section", "filieres"); // Pass the section name
         return modelAndView;
     }
-
     @GetMapping("/dashboard/etudiant")
     public ModelAndView etudiant(HttpSession session, Model model) {
         User user = (User) session.getAttribute("user");

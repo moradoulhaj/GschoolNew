@@ -1,10 +1,10 @@
-<div th:fragment="edit">
+<div th:fragment="editStudent">
     <!-- Edit Modal -->
     <div id="editModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeEditModal()">&times;</span>
-            <h2>Edit Student</h2>
-            <form id="editForm">
+            <h2>Modifier un étudiant</h2>
+            <form id="editForm" enctype="multipart/form-data">
                 <input type="hidden" id="editId" name="id">
 
                 <div>
@@ -19,21 +19,19 @@
 
                 <div>
                     <label for="editCne">CNE *:</label>
-                    <input type="text" id="editCne" name="cne" required>
+                    <input type="text" id="editCne" name="cne" required pattern="[A-Za-z0-9]{10}">
                 </div>
 
                 <div>
                     <label for="editFiliere">Filière *:</label>
                     <select id="editFiliere" name="filiere" required>
-                        <option value="1">Informatique</option>
-                        <option value="2">Gestion</option>
-                        <option value="3">Mathématiques</option>
+                        <option value="">Sélectionner une filière</option>
                     </select>
                 </div>
 
                 <div>
-                    <label for="editPhoto">Photo *:</label>
-                    <input type="file" id="editPhoto" name="photo">
+                    <label for="editPhoto">Photo :</label>
+                    <input type="file" id="editPhoto" name="photo" accept="image/*">
                 </div>
 
                 <div class="form-actions">
@@ -44,9 +42,7 @@
         </div>
     </div>
 
-    <!-- Styles for Modal -->
     <style>
-        /* Modal Background */
         .modal {
             display: none;
             position: fixed;
@@ -60,28 +56,29 @@
             align-items: center;
         }
 
-        /* Modal Content */
         .modal-content {
             background: white;
             padding: 20px;
             border-radius: 10px;
             width: 400px;
             text-align: center;
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.3s ease-in-out;
         }
 
-        /* Close Button */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
         .close {
             float: right;
             font-size: 20px;
             cursor: pointer;
         }
 
-        .close:hover {
-            color: red;
-        }
+        .close:hover { color: red; }
 
-        /* Form Inputs */
         input, select {
             width: 100%;
             padding: 8px;
@@ -90,7 +87,6 @@
             border: 1px solid #ccc;
         }
 
-        /* Buttons */
         .form-actions {
             margin-top: 15px;
             display: flex;
@@ -104,24 +100,38 @@
             border-radius: 5px;
         }
 
-        .btn-cancel {
-            background: #ccc;
-        }
-
-        .btn-save {
-            background: #28a745;
-            color: white;
-        }
-
-        .btn-save:hover {
-            background: #218838;
-        }
-
+        .btn-cancel { background: #ccc; }
+        .btn-save { background: #28a745; color: white; }
+        .btn-save:hover { background: #218838; }
     </style>
 
-    <!-- Script for Edit Functionality -->
-    <script th:inline="javascript">
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("editForm").addEventListener("submit", function (event) {
+                event.preventDefault();
+                updateStudent();
+            });
+        });
+
+        function fetchFilieres() {
+            fetch('/api/filieres')
+                .then(response => response.json())
+                .then(data => {
+                    const filiereDropdown = document.getElementById('editFiliere');
+                    filiereDropdown.innerHTML = '<option value="">Sélectionner une filière</option>';
+                    data.forEach(filiere => {
+                        const option = document.createElement('option');
+                        option.value = filiere.id;
+                        option.textContent = filiere.libelle;
+                        filiereDropdown.appendChild(option);
+                    });
+                })
+                .catch(error => console.error("Erreur lors de la récupération des filières", error));
+        }
+
         function openEditModal(studentId) {
+            fetchFilieres(); // Ensure filieres are fetched before opening the modal
+
             fetch(`/api/students/${studentId}`)
                 .then(response => response.json())
                 .then(data => {
@@ -129,44 +139,38 @@
                     document.getElementById('editNom').value = data.nom;
                     document.getElementById('editPrenom').value = data.prenom;
                     document.getElementById('editCne').value = data.cne;
-                    document.getElementById('editFiliere').value = data.filiere.id;
-
+                    document.getElementById('editFiliere').value = data.filiere.id; // Set the current filiere
                     document.getElementById('editModal').style.display = 'flex';
                 })
-                .catch(error => console.error("Error fetching student data:", error));
+                .catch(error => console.error("Erreur lors de la récupération de l'étudiant", error));
         }
 
         function closeEditModal() {
             document.getElementById('editModal').style.display = 'none';
         }
 
-        document.getElementById('editForm').addEventListener('submit', function (event) {
-            event.preventDefault();
+        function updateStudent() {
+            const formData = new FormData(document.getElementById("editForm"));
+            const studentId = document.getElementById("editId").value;
 
-            const formData = {
-                id: document.getElementById('editId').value,
-                nom: document.getElementById('editNom').value,
-                prenom: document.getElementById('editPrenom').value,
-                cne: document.getElementById('editCne').value,
-                filiere: { id: document.getElementById('editFiliere').value },
-                photo: document.getElementById('editPhoto').files[0]?.name || '',
-            };
-
-            const studentId = document.getElementById('editId').value;
             fetch(`/api/students/${studentId}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData),
+                body: formData
             })
                 .then(response => {
-                    if (response.ok) {
-                        closeEditModal();
-                        window.location.reload();
-                    } else {
-                        console.error("Failed to update student");
+                    if (!response.ok) {
+                        throw new Error("Échec de la mise à jour");
                     }
+                    return response.json();
                 })
-                .catch(error => console.error("Error updating student:", error));
-        });
+                .then(() => {
+                    closeEditModal();
+                    window.location.reload();
+                })
+                .catch(error => {
+                    console.error("Erreur lors de la mise à jour", error);
+                    alert("Erreur lors de la mise à jour de l'étudiant");
+                });
+        }
     </script>
 </div>

@@ -1,56 +1,75 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestion des Filières</title>
-    <link rel="stylesheet" href="/css/styles.css"> <!-- Optional CSS -->
-</head>
-<body>
-<h2>Gestion des Filières</h2>
+<div th:fragment="filieres">
+    <!-- Header Section with h1 and Button -->
+    <div class="header-section">
+        <h1 class="page-title">Gestion des Filières</h1>
+        <button class="btn-add" onclick="openAddFiliereModal()">Ajouter une Filière</button>
+    </div>
 
-<button onclick="loadFilieres()">Actualiser</button>
+    <div class="filiere-list">
+        <h2>Liste des Filières</h2>
+        <table>
+            <thead>
+            <tr>
+                <th>#</th> <!-- Auto-incremented index -->
+                <th>Code</th>
+                <th>Libellé</th>
+                <th>Nombre d'Étudiants</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- Loop through the list of filieres with stat.index -->
+            <tr th:each="filiere, stat : ${filieres}">
+                <td th:text="${stat.count}">1</td> <!-- Auto-incremented index -->
+                <td th:text="${filiere.code}">INF</td>
+                <td th:text="${filiere.libelle}">Informatique</td>
+                <td th:text="${filiere.nbrEtudiant}">50</td>
+                <td>
+                    <!-- Edit Button -->
+                    <button class="btn btn-edit" th:onclick="'openEditFiliereModal(' + ${filiere.id} + ')'">Edit</button>
+                    <!-- Delete Button -->
+                    <button class="btn btn-delete" th:onclick="'deleteFiliere(' + ${filiere.id} + ')'">Delete</button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 
-<table border="1">
-    <thead>
-    <tr>
-        <th>ID</th>
-        <th>Code</th>
-        <th>Libellé</th>
-        <th>Nombre d'Étudiants</th>
-    </tr>
-    </thead>
-    <tbody id="filieresTableBody">
-    <tr><td colspan="4">Chargement des filières...</td></tr>
-    </tbody>
-</table>
+    <!-- Styles for Header Section -->
+    <style>
+        /* Header Section */
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f8f9fa; /* Light gray background */
+            padding: px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
 
-<script>
-    function loadFilieres() {
-        fetch("/api/filieres")
-            .then(response => response.json())
-            .then(data => {
-                let tableBody = document.getElementById("filieresTableBody");
-                tableBody.innerHTML = ""; // Clear existing content
+        /* Styled h1 Heading */
+        .page-title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #333;
+            margin: 0; /* Remove default margin */
+        }
 
-                data.forEach(filiere => {
-                    let row = `<tr>
-                            <td>${filiere.id}</td>
-                            <td>${filiere.code}</td>
-                            <td>${filiere.libelle}</td>
-                            <td>${filiere.nbrEtudiant}</td>
-                        </tr>`;
-                    tableBody.innerHTML += row;
-                });
-            })
-            .catch(error => {
-                console.error("Erreur lors du chargement des filières:", error);
-                document.getElementById("filieresTableBody").innerHTML =
-                    "<tr><td colspan='4'>Erreur lors du chargement.</td></tr>";
-            });
-    }
+        /* Styled Button */
+        .btn-add {
+            background-color: #28a745; /* Green */
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
 
-    document.addEventListener("DOMContentLoaded", loadFilieres);
-</script>
-</body>
-</html>
+        .btn-add:hover {
+            background-color: #218838; /* Darker green on hover */
+        }
+    </style>
+</div>
