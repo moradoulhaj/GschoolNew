@@ -63,4 +63,10 @@ public class UserService {
 
         return null; // User not found
     }
+    public long getTotalUsers() {
+        return userRepository.count();
+    }
+    public boolean existsByLogin(String login) {
+        return userRepository.existsByLogin(login);
+    }
 }

@@ -1,9 +1,31 @@
 <div th:fragment="accueil">
     <h1>Accueil</h1>
     <p>Bienvenue sur le tableau de bord. Voici quelques statistiques :</p>
-
-    <!-- Charts Container -->
-    <div class="charts-container">
+    <!-- Static Summary Cards -->
+    <!-- Dynamic Summary Cards -->
+    <div class="summary-cards">
+        <div class="card students">
+            <i class="fas fa-user-graduate"></i>
+            <div class="card-info">
+                <h3>Total Étudiants</h3>
+                <p id="totalStudents">Loading...</p> <!-- Dynamic content here -->
+            </div>
+        </div>
+        <div class="card filieres">
+            <i class="fas fa-book"></i>
+            <div class="card-info">
+                <h3>Total Filières</h3>
+                <p id="totalFiliere">Loading...</p> <!-- Dynamic content here -->
+            </div>
+        </div>
+        <div class="card users">
+            <i class="fas fa-users"></i>
+            <div class="card-info">
+                <h3>Total Utilisateurs</h3>
+                <p id="totalUsers">Loading...</p> <!-- Dynamic content here -->
+            </div>
+        </div>
+    </div>    <div class="charts-container">
         <!-- Bar Chart -->
         <div class="chart">
             <h2>Nombre d'Étudiants par Filière</h2>
@@ -21,8 +43,32 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <!-- Script to Render Charts -->
+    <!-- Script to Render Charts and Dynamic Summary Cards -->
     <script th:inline="javascript">
-        // Fetch data for charts
+        // Fetch data for summary and charts
+        Promise.all([
+            fetch('/api/students/count'), // Endpoint for student count
+            fetch('/api/filieres/count'), // Endpoint for filière count
+            fetch('/api/users/count')    // Endpoint for users count
+        ])
+            .then(([studentsResponse, filieresResponse, usersResponse]) => {
+                return Promise.all([studentsResponse.json(), filieresResponse.json(), usersResponse.json()]);
+            })
+            .then(([studentsCount, filieresCount, usersCount]) => {
+                // Update summary cards with dynamic data
+                document.getElementById('totalStudents').textContent = studentsCount;
+                document.getElementById('totalFiliere').textContent = filieresCount;
+                document.getElementById('totalUsers').textContent = usersCount;
+            })
+            .catch(error => {
+                console.error("Error fetching summary data:", error);
+                // Handle the error by displaying an error message
+                document.getElementById('totalStudents').textContent = 'Error loading data';
+                document.getElementById('totalFiliere').textContent = 'Error loading data';
+                document.getElementById('totalUsers').textContent = 'Error loading data';
+            });
+
+        // Fetch data for charts (existing chart logic remains the same)
         fetch('/api/filieres')
             .then(response => response.json())
             .then(data => {
@@ -50,7 +96,7 @@
                             }
                         },
                         responsive: true,
-                        maintainAspectRatio: false // Allow custom height
+                        maintainAspectRatio: false
                     }
                 });
 
@@ -84,12 +130,13 @@
                     },
                     options: {
                         responsive: true,
-                        maintainAspectRatio: false // Allow custom height
+                        maintainAspectRatio: false
                     }
                 });
             })
             .catch(error => console.error("Error fetching filières data:", error));
     </script>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 
     <!-- Styles for Charts -->
     <style>
@@ -108,7 +155,7 @@
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-            height: 80%; /* Take full height of the container */
+            height: 60%; /* Take full height of the container */
             display: flex;
             flex-direction: column;
             align-items: center;

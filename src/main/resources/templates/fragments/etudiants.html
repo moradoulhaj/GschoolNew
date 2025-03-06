@@ -1,4 +1,4 @@
-<div th:fragment="etudiant">
+<div th:fragment="etudiants">
     <!-- Header Section with h1 and Button -->
     <div class="header-section">
         <h1 class="page-title">Gestion des Étudiants</h1>
@@ -38,6 +38,8 @@
             </tbody>
         </table>
     </div>
+    <div th:replace="fragments/editStudent :: editStudent"></div>
+    <div th:replace="fragments/addStudent :: addStudent"></div>
 
     <!-- Styles for Header Section -->
     <style>

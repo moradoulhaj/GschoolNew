@@ -1,0 +1,182 @@
+<div th:fragment="editUser">
+    <!-- Edit User Modal -->
+    <div id="editUserModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditUserModal()">&times;</span>
+            <h2>Modifier un Utilisateur</h2>
+            <form id="editUserForm">
+                <input type="hidden" id="editUserId" name="id">
+
+                <div>
+                    <label for="editUserNom">Nom *:</label>
+                    <input type="text" id="editUserNom" name="nom" required>
+                </div>
+
+                <div>
+                    <label for="editUserPrenom">Prénom *:</label>
+                    <input type="text" id="editUserPrenom" name="prenom" required>
+                </div>
+
+                <div>
+                    <label for="editUserLogin">Username *:</label>
+                    <input type="text" id="editUserLogin" name="login" required>
+                </div>
+
+                <div>
+                    <label for="editUserPassword">Mot de Passe *:</label>
+                    <input type="password" id="editUserPassword" name="password" required>
+                </div>
+
+                <!-- Error Message Container -->
+                <div id="editUserError" class="error-message" style="display: none; color: red;"></div>
+
+                <div class="form-actions">
+                    <button type="button" onclick="closeEditUserModal()" class="btn-cancel">Annuler</button>
+                    <button type="submit" class="btn-save">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 400px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .close {
+            float: right;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: red;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        .form-actions {
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .btn-cancel, .btn-save {
+            padding: 10px 15px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .btn-cancel {
+            background: #ccc;
+        }
+
+        .btn-save {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-save:hover {
+            background: #218838;
+        }
+    </style>
+
+    <script th:inline="javascript">
+        function openEditUserModal(userId) {
+            fetch(`/api/users/${userId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Erreur lors de la récupération de l'utilisateur");
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    document.getElementById('editUserId').value = data.id;
+                    document.getElementById('editUserNom').value = data.nom;
+                    document.getElementById('editUserPrenom').value = data.prenom;
+                    document.getElementById('editUserLogin').value = data.login;
+                    document.getElementById('editUserPassword').value = ''; // Optional: Add placeholder if required
+                    document.getElementById('editUserModal').style.display = 'flex';
+                })
+                .catch(error => {
+                    console.error("Erreur lors de la récupération de l'utilisateur:", error);
+                    alert("Impossible de charger les données de l'utilisateur.");
+                });
+        }
+
+        function closeEditUserModal() {
+            document.getElementById('editUserModal').style.display = 'none';
+            document.getElementById('editUserForm').reset();
+            // Clear the error message when closing the modal
+            document.getElementById('editUserError').style.display = 'none';
+            document.getElementById('editUserError').textContent = '';
+        }
+
+        document.getElementById('editUserForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const userId = document.getElementById('editUserId').value;
+            const formData = {
+                nom: document.getElementById('editUserNom').value,
+                prenom: document.getElementById('editUserPrenom').value,
+                login: document.getElementById('editUserLogin').value,
+                password: document.getElementById('editUserPassword').value,
+            };
+
+            fetch(`/api/users/${userId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData),
+            })
+                .then(response => {
+                    if (response.ok) {
+                        closeEditUserModal();
+                        window.location.reload(); // Reload the page to reflect changes
+                    } else {
+                        // Parse the error response
+                        return response.json().then(data => {
+                            throw new Error(data.error || "Failed to update user.");
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error("Error updating user:", error);
+                    // Display the error message in the modal
+                    const errorMessage = document.getElementById('editUserError');
+                    errorMessage.textContent = error.message;
+                    errorMessage.style.display = 'block';
+                });
+        });
+    </script>
+</div>

@@ -6,13 +6,13 @@
             <h2>Ajouter un Étudiant</h2>
             <form id="addStudentForm">
                 <div>
-                    <label for="addNom">Nom *:</label>
-                    <input type="text" id="addNom" name="nom" required>
+                    <label for="addNomStudent">Nom *:</label>
+                    <input type="text" id="addNomStudent" name="nom" required>
                 </div>
 
                 <div>
-                    <label for="addPrenom">Prénom *:</label>
-                    <input type="text" id="addPrenom" name="prenom" required>
+                    <label for="addPrenomStudent">Prénom *:</label>
+                    <input type="text" id="addPrenomStudent" name="prenom" required>
                 </div>
 
                 <div>
@@ -24,7 +24,6 @@
                     <label for="addFiliere">Filière *:</label>
                     <select id="addFiliere" name="filiere" required>
                         <option value="">Sélectionner une filière</option>
-                        <!-- Options will be populated dynamically -->
                     </select>
                 </div>
 
@@ -32,6 +31,7 @@
                     <label for="addPhoto">Photo:</label>
                     <input type="file" id="addPhoto" name="photo">
                 </div>
+                <div id="addStudentError" style="color: red; display: none;"></div> <!-- Error Message -->
 
                 <div class="form-actions">
                     <button type="button" onclick="closeAddStudentModal()" class="btn-cancel">Annuler</button>
@@ -41,90 +41,13 @@
         </div>
     </div>
 
-    <!-- Styles for Modal -->
-    <style>
-        /* Modal Background */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            justify-content: center;
-            align-items: center;
-        }
-
-        /* Modal Content */
-        .modal-content {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            width: 400px;
-            text-align: center;
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
-        }
-
-        /* Close Button */
-        .close {
-            float: right;
-            font-size: 20px;
-            cursor: pointer;
-        }
-
-        .close:hover {
-            color: red;
-        }
-
-        /* Form Inputs */
-        input, select {
-            width: 100%;
-            padding: 8px;
-            margin: 5px 0;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
-
-        /* Buttons */
-        .form-actions {
-            margin-top: 15px;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .btn-cancel, .btn-save {
-            padding: 10px 15px;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-
-        .btn-cancel {
-            background: #ccc;
-        }
-
-        .btn-save {
-            background: #28a745;
-            color: white;
-        }
-
-        .btn-save:hover {
-            background: #218838;
-        }
-    </style>
-
-    <!-- Script for Add Student Functionality -->
     <script th:inline="javascript">
-        // Function to fetch filières and populate the dropdown
         function fetchFilieres() {
             fetch('/api/filieres')
                 .then(response => response.json())
                 .then(data => {
                     const filiereDropdown = document.getElementById('addFiliere');
                     filiereDropdown.innerHTML = '<option value="">Sélectionner une filière</option>';
-
                     data.forEach(filiere => {
                         const option = document.createElement('option');
                         option.value = filiere.id;
@@ -132,30 +55,27 @@
                         filiereDropdown.appendChild(option);
                     });
                 })
-                .catch(error => console.error("Error fetching filières:", error));
+                .catch(error => {
+                    document.getElementById('addStudentError').style.display = 'block';
+                    document.getElementById('addStudentError').textContent = "Erreur lors du chargement des filières.";
+                });
         }
 
-        // Function to open the add student modal
         function openAddStudentModal() {
-            // Fetch filières and populate the dropdown
             fetchFilieres();
-
-            // Display the modal
             document.getElementById('addStudentModal').style.display = 'flex';
         }
 
-        // Function to close the add student modal
         function closeAddStudentModal() {
             document.getElementById('addStudentModal').style.display = 'none';
         }
 
-        // Handle form submission
         document.getElementById('addStudentForm').addEventListener('submit', function (event) {
             event.preventDefault();
 
             const formData = {
-                nom: document.getElementById('addNom').value,
-                prenom: document.getElementById('addPrenom').value,
+                nom: document.getElementById('addNomStudent').value,
+                prenom: document.getElementById('addPrenomStudent').value,
                 cne: document.getElementById('addCne').value,
                 filiere: { id: document.getElementById('addFiliere').value },
                 photo: document.getElementById('addPhoto').files[0]?.name || '',
@@ -166,15 +86,21 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData),
             })
-                .then(response => {
-                    if (response.ok) {
+                .then(response => response.json().then(data => ({ status: response.status, body: data })))
+                .then(({ status, body }) => {
+                    if (status === 200 || status === 201) {
                         closeAddStudentModal();
                         window.location.reload(); // Reload the page to reflect changes
                     } else {
-                        console.error("Failed to add student");
+                        document.getElementById('addStudentError').style.display = 'block';
+                        document.getElementById('addStudentError').textContent = body.error || "Erreur lors de l'ajout de l'étudiant.";
                     }
                 })
-                .catch(error => console.error("Error adding student:", error));
+                .catch(error => {
+                    console.error("Error adding student:", error);
+                    document.getElementById('addStudentError').style.display = 'block';
+                    document.getElementById('addStudentError').textContent = "Erreur lors de l'ajout de l'étudiant.";
+                });
         });
     </script>
 </div>

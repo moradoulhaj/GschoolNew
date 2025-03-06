@@ -1,10 +1,102 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+<div th:fragment="utilisateurs">
+    <!-- Header Section with h1 and Button -->
+    <div class="header-section">
+        <h1 class="page-title">Gestion des Utilisateurs</h1>
+      <button class="btn-add" onclick="openAddUserModal()">Ajouter un Utilisateur</button>
+    </div>
 
-</body>
-</html>
+    <div class="user-list">
+        <h2>Liste des Utilisateurs</h2>
+        <table>
+            <thead>
+            <tr>
+                <th>#</th> <!-- Auto-incremented index -->
+                <th>Nom</th>
+                <th>Prenom</th>
+                <th>Username</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- Loop through the list of users with stat.index -->
+            <tr th:each="utilisateur, stat : ${utilisateurs}">
+                <td th:text="${stat.count}">1</td> <!-- Auto-incremented index -->
+                <td th:text="${utilisateur.nom}">Doe</td>
+                <td th:text="${utilisateur.prenom}">johndoe@example.com</td>
+                <td th:text="${utilisateur.login}">Admin</td>
+           <td>
+
+               <button class="btn btn-edit" th:onclick="'openEditUserModal(' + ${utilisateur.id} + ')'">Edit</button>
+               <button class="btn btn-delete" th:onclick="'deleteUser(' + ${utilisateur.id} + ')'">Delete</button>
+
+           </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Styles for Header Section -->
+    <style>
+        /* Header Section */
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f8f9fa; /* Light gray background */
+            padding: px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        /* Styled h1 Heading */
+        .page-title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #333;
+            margin: 0; /* Remove default margin */
+        }
+
+        /* Styled Button */
+        .btn-add {
+            background-color: #28a745; /* Green */
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-add:hover {
+            background-color: #218838; /* Darker green on hover */
+        }
+
+        /* Action Buttons */
+        .btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-edit {
+            background-color: #e0a800;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background-color: #d39e00;
+        }
+
+        .btn-delete {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background-color: #c82333;
+        }
+    </style>
+</div>
