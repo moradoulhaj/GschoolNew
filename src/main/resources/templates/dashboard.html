@@ -16,7 +16,7 @@
 <!-- Main Content -->
 <div class="main-content">
     <!-- Render Content Based on Section -->
-    <div th:if="${section == 'accueil' || section == 'accueil' }">
+    <div th:if="${section == 'accueil'}">
         <div th:replace="fragments/accueil :: accueil"></div>
     </div>
 
@@ -24,8 +24,8 @@
         <div th:replace="fragments/filieres :: filieres"></div>
     </div>
 
-    <div th:if="${section == 'etudiant'}">
-        <div th:replace="fragments/etudiant :: etudiant"></div>
+    <div th:if="${section == 'etudiants'}">
+        <div th:replace="fragments/etudiants :: etudiants"></div>
     </div>
 
     <div th:if="${section == 'utilisateurs'}">
@@ -40,6 +40,9 @@
     <!-- Include Edit Fragment -->
     <div th:replace="fragments/editStudent :: editStudent"></div>
     <div th:replace="fragments/editFiliere :: editFiliere"></div>
+    <div th:replace="fragments/editUser :: editUser"></div>
+    <div th:replace="fragments/addUser :: addUser"></div>
+
     <div th:replace="fragments/addFiliere :: addFiliere"></div>
     <div th:replace="fragments/addStudent :: addStudent"></div>
 
@@ -48,8 +51,25 @@
 
 <script>
     function logout() {
-        window.location.href = "/login";
+        fetch("/api/logout", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        })
+            .then(response => {
+                if (response.ok) {
+                    // Redirect to the login page after successful logout
+                    window.location.href = "/login";
+                } else {
+                    console.error("Failed to log out");
+                }
+            })
+            .catch(error => {
+                console.error("Error logging out:", error);
+            });
     }
+
     function deleteStudent(studentId) {
         console.log("Deleting student with ID:", studentId); // Debugging
         if (confirm("Are you sure you want to delete this student?")) {
@@ -85,6 +105,25 @@
                 })
                 .catch(error => {
                     console.error("Error deleting filiere:", error);
+                });
+        }
+    }
+    function deleteUser(UserId) {
+        console.log("Deleting student with ID:", UserId); // Debugging
+        if (confirm("Are you sure you want to delete this user?")) {
+            fetch(`/api/users/${UserId}`, {
+                method: 'DELETE',
+            })
+                .then(response => {
+                    if (response.ok) {
+                        // Reload the page to reflect changes
+                        window.location.reload();
+                    } else {
+                        console.error("Failed to delete user");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error deleting user:", error);
                 });
         }
     }

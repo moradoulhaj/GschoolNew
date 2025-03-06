@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -34,5 +33,12 @@ public class LoginController {
                     .status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("message", "Invalid login or password"));
         }
+    }
+
+    // Logout endpoint to invalidate session
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpSession session) {
+        session.invalidate(); // Invalidate the session
+        return ResponseEntity.ok(Map.of("message", "Logout successful"));
     }
 }

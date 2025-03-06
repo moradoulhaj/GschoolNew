@@ -19,7 +19,7 @@
 
                 <div>
                     <label for="editCne">CNE *:</label>
-                    <input type="text" id="editCne" name="cne" required pattern="[A-Za-z0-9]{10}">
+                    <input type="text" id="editCne" name="cne" required />
                 </div>
 
                 <div>
@@ -113,6 +113,23 @@
             });
         });
 
+        function openEditModal(studentId) {
+            fetchFilieres(); // Fetch filières to populate the dropdown
+
+            fetch(`/api/students/${studentId}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('editId').value = data.id;
+                    document.getElementById('editNom').value = data.nom;
+                    document.getElementById('editPrenom').value = data.prenom;
+                    document.getElementById('editCne').value = data.cne;
+
+                    // No need to set the filiere value as you mentioned
+                    document.getElementById('editModal').style.display = 'flex';
+                })
+                .catch(error => console.error("Erreur lors de la récupération de l'étudiant", error));
+        }
+
         function fetchFilieres() {
             fetch('/api/filieres')
                 .then(response => response.json())
@@ -127,22 +144,6 @@
                     });
                 })
                 .catch(error => console.error("Erreur lors de la récupération des filières", error));
-        }
-
-        function openEditModal(studentId) {
-            fetchFilieres(); // Ensure filieres are fetched before opening the modal
-
-            fetch(`/api/students/${studentId}`)
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('editId').value = data.id;
-                    document.getElementById('editNom').value = data.nom;
-                    document.getElementById('editPrenom').value = data.prenom;
-                    document.getElementById('editCne').value = data.cne;
-                    document.getElementById('editFiliere').value = data.filiere.id; // Set the current filiere
-                    document.getElementById('editModal').style.display = 'flex';
-                })
-                .catch(error => console.error("Erreur lors de la récupération de l'étudiant", error));
         }
 
         function closeEditModal() {

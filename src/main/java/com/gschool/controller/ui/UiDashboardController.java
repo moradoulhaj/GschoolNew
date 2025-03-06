@@ -5,6 +5,7 @@ import com.gschool.entities.Student;
 import com.gschool.entities.User;
 import com.gschool.service.FiliereService;
 import com.gschool.service.StudentService;
+import com.gschool.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,11 +19,13 @@ public class UiDashboardController {
 
     private final StudentService etudiantService;
     private final FiliereService filiereService;
+    private final UserService userService;
 
     // Inject EtudiantService via constructor
-    public UiDashboardController(StudentService etudiantService , FiliereService filiereService ) {
+    public UiDashboardController(StudentService etudiantService , FiliereService filiereService , UserService userService) {
         this.etudiantService = etudiantService;
         this.filiereService = filiereService;
+        this.userService = userService;
     }
 
     @GetMapping("/dashboard")
@@ -36,6 +39,7 @@ public class UiDashboardController {
         ModelAndView modelAndView = new ModelAndView("dashboard");
         modelAndView.addObject("user", user);
         modelAndView.addObject("section", "accueil"); // Pass the section name
+
         return modelAndView;
     }
 
@@ -74,6 +78,7 @@ public class UiDashboardController {
         modelAndView.addObject("section", "filieres"); // Pass the section name
         return modelAndView;
     }
+
     @GetMapping("/dashboard/etudiant")
     public ModelAndView etudiant(HttpSession session, Model model) {
         User user = (User) session.getAttribute("user");
@@ -90,18 +95,25 @@ public class UiDashboardController {
 
         ModelAndView modelAndView = new ModelAndView("dashboard");
         modelAndView.addObject("user", user);
-        modelAndView.addObject("section", "etudiant"); // Pass the section name
+        modelAndView.addObject("section", "etudiants"); // Pass the section name
         return modelAndView;
     }
 
     @GetMapping("/dashboard/utilisateurs")
-    public ModelAndView utilisateurs(HttpSession session) {
+    public ModelAndView utilisateurs(HttpSession session, Model model) {
         User user = (User) session.getAttribute("user");
 
         if (user == null) {
             return new ModelAndView("redirect:/login"); // Redirect if not logged in
         }
 
+        // Fetch users from the database
+        List<User> utilisateurs = userService.getAllUsers();
+
+        // Add users to the model
+        model.addAttribute("utilisateurs", utilisateurs);
+
+        // Create ModelAndView and add necessary objects
         ModelAndView modelAndView = new ModelAndView("dashboard");
         modelAndView.addObject("user", user);
         modelAndView.addObject("section", "utilisateurs"); // Pass the section name
