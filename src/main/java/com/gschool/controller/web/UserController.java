@@ -47,4 +47,9 @@ public class UserController {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
+    @GetMapping("/count")
+    public ResponseEntity<Long> getTotalUsers() {
+        Long totalUsers = userService.getTotalUsers();
+        return ResponseEntity.ok(totalUsers);
+    }
 }

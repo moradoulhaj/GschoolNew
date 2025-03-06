@@ -14,3 +14,73 @@
         </div>
     </div>
 </div>
+
+<style>
+    /* Topbar styles */
+    .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
+        background-color: #2C3E50;
+        color: white;
+        font-family: Arial, sans-serif;
+    }
+
+    .logo {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #ECF0F1;
+    }
+
+    .right-section {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .user-info {
+        font-size: 1rem;
+        color: #ECF0F1;
+    }
+
+    .date {
+        font-size: 1rem;
+        color: #ECF0F1;
+    }
+
+    .logout-btn {
+        padding: 8px 15px;
+        background-color: #E74C3C;
+        border: none;
+        color: white;
+        font-size: 1rem;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+
+    .logout-btn:hover {
+        background-color: #C0392B;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .topbar {
+            flex-direction: column;
+            align-items: flex-start;
+            text-align: left;
+        }
+
+        .right-section {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .logout-btn {
+            width: 100%;
+            text-align: center;
+        }
+    }
+</style>

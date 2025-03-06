@@ -7,7 +7,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/filieres")
@@ -31,13 +33,29 @@ public class FiliereController {
     }
 
     @PostMapping
-    public ResponseEntity<Filiere> addFiliere(@Valid @RequestBody Filiere filiere) {
+    public ResponseEntity<?> addFiliere(@Valid @RequestBody Filiere filiere) {
+        // Check if a Filiere with the same code exists
+        if (filiereService.existsByCode(filiere.getCode())) {
+            // Return conflict status with an error message in JSON format
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Filière with the same code already exists.");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+        }
+
+        // Save the new Filiere if no duplicate is found
         Filiere newFiliere = filiereService.addFiliere(filiere);
         return new ResponseEntity<>(newFiliere, HttpStatus.CREATED);
     }
-
     @PutMapping("/{id}")
-    public ResponseEntity<Filiere> updateFiliere(@PathVariable Integer id, @Valid @RequestBody Filiere filiereDetails) {
+    public ResponseEntity<?> updateFiliere(@PathVariable Integer id, @Valid @RequestBody Filiere filiereDetails) {
+        // Check if the code already exists in the database before updating
+        if (filiereService.existsByCode(filiereDetails.getCode())) {
+            // Return an error message wrapped in ResponseEntity
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Code already exists.");
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+
         Filiere updatedFiliere = filiereService.updateFiliere(id, filiereDetails);
         return updatedFiliere != null ? ResponseEntity.ok(updatedFiliere) : ResponseEntity.notFound().build();
     }
@@ -46,5 +64,11 @@ public class FiliereController {
     public ResponseEntity<Void> deleteFiliere(@PathVariable Integer id) {
         filiereService.deleteFiliere(id);
         return ResponseEntity.noContent().build();
+    }
+    @GetMapping("/count")
+    public ResponseEntity<Long> getTotalFilieres() {
+        Long totalFilieres = filiereService.getTotalFilieres();
+        return ResponseEntity.ok(totalFilieres);
+
     }
 }

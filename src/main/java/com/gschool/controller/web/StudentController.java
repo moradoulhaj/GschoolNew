@@ -7,7 +7,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/students")
@@ -31,13 +33,30 @@ public class StudentController {
     }
 
     @PostMapping
-    public ResponseEntity<Student> addStudent(@Valid @RequestBody Student student) {
+    public ResponseEntity<?> addStudent(@Valid @RequestBody Student student) {
+        // Check if a student with the same CNE exists
+        if (studentService.existsByCne(student.getCne())) {
+            // Return conflict status with an error message in JSON format
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Student with the same CNE already exists.");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+        }
+
+        // Save the new Student if no duplicate is found
         Student newStudent = studentService.addStudent(student);
         return new ResponseEntity<>(newStudent, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Student> updateStudent(@PathVariable Integer id, @Valid @RequestBody Student studentDetails) {
+    public ResponseEntity<?> updateStudent(@PathVariable Integer id, @Valid @RequestBody Student studentDetails) {
+        // Check if the CNE already exists in the database before updating
+        if (studentService.existsByCne(studentDetails.getCne())) {
+            // Return an error message wrapped in ResponseEntity
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "CNE already exists.");
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+
         Student updatedStudent = studentService.updateStudent(id, studentDetails);
         return updatedStudent != null ? ResponseEntity.ok(updatedStudent) : ResponseEntity.notFound().build();
     }
@@ -47,4 +66,10 @@ public class StudentController {
         studentService.deleteStudent(id);
         return ResponseEntity.noContent().build();
     }
-}
+    // Endpoint to get the total count of students
+    @GetMapping("/count")
+    public ResponseEntity<Long> getTotalStudents() {
+        long totalStudents = studentService.getTotalStudents();
+        return ResponseEntity.ok(totalStudents);
+    }}
+

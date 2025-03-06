@@ -1,5 +1,5 @@
 <div th:fragment="editFiliere">
-    <!-- Edit Filiere Modal -->
+    <!-- Edit Filière Modal -->
     <div id="editFiliereModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeEditFiliereModal()">&times;</span>
@@ -21,6 +21,9 @@
                     <label for="editNbrEtudiant">Nombre d'Étudiants:</label>
                     <input type="number" id="editNbrEtudiant" name="nbrEtudiant" readonly>
                 </div>
+
+                <!-- Error Message Container -->
+                <div id="errorMessage" style="color: red; margin-bottom: 10px; display: none;"></div>
 
                 <div class="form-actions">
                     <button type="button" onclick="closeEditFiliereModal()" class="btn-cancel">Annuler</button>
@@ -45,16 +48,19 @@
                     document.getElementById('editLibelle').value = data.libelle;
                     document.getElementById('editNbrEtudiant').value = data.nbrEtudiant;
                     document.getElementById('editFiliereModal').style.display = 'flex';
+                    document.getElementById('errorMessage').style.display = 'none'; // Hide error message when opening modal
                 })
                 .catch(error => {
                     console.error("Erreur lors de la récupération de la filière:", error);
-                    alert("Impossible de charger les données de la filière.");
+                    document.getElementById('errorMessage').textContent = "Impossible de charger les données de la filière.";
+                    document.getElementById('errorMessage').style.display = 'block';
                 });
         }
 
         function closeEditFiliereModal() {
             document.getElementById('editFiliereModal').style.display = 'none';
             document.getElementById('editFiliereForm').reset();
+            document.getElementById('errorMessage').style.display = 'none'; // Hide error message on close
         }
 
         document.getElementById('editFiliereForm').addEventListener('submit', function (event) {
@@ -67,12 +73,14 @@
 
             fetch(`/api/filieres/${filiereId}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(formData),
             })
                 .then(response => {
                     if (!response.ok) {
-                        throw new Error("Erreur lors de la mise à jour de la filière");
+                        return response.json().then(data => {
+                            throw new Error(data.error);
+                        });
                     }
                     return response.json();
                 })
@@ -82,7 +90,8 @@
                 })
                 .catch(error => {
                     console.error("Erreur lors de la mise à jour de la filière:", error);
-                    alert("Échec de la mise à jour. Veuillez réessayer.");
+                    document.getElementById('errorMessage').textContent = error.message;
+                    document.getElementById('errorMessage').style.display = 'block';
                 });
         });
     </script>

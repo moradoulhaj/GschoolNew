@@ -41,4 +41,26 @@ public class FiliereService {
     public void deleteFiliere(Integer id) {
         filiereRepository.deleteById(id);
     }
+    public void incrementNbrEtudiant(Integer filiereId) {
+        filiereRepository.findById(filiereId).ifPresent(filiere -> {
+            filiere.setNbrEtudiant(filiere.getNbrEtudiant() + 1);
+            filiereRepository.save(filiere);
+        });
+    }
+
+    public void decrementNbrEtudiant(Integer filiereId) {
+        filiereRepository.findById(filiereId).ifPresent(filiere -> {
+            if (filiere.getNbrEtudiant() > 0) {
+                filiere.setNbrEtudiant(filiere.getNbrEtudiant() - 1);
+                filiereRepository.save(filiere);
+            }
+        });
+    }
+    public long getTotalFilieres() {
+        return filiereRepository.count();
+    }
+    public boolean existsByCode(String code) {
+        return filiereRepository.existsByCode(code);
+    }
+
 }

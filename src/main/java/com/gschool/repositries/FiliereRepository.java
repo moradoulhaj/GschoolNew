@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface FiliereRepository extends JpaRepository <Filiere , Integer> {
+    boolean existsByCode (String code);
 }

@@ -4,6 +4,7 @@
         <div class="modal-content">
             <span class="close" onclick="closeAddFiliereModal()">&times;</span>
             <h2>Ajouter une Filière</h2>
+
             <form id="addFiliereForm">
                 <div>
                     <label for="addCode">Code *:</label>
@@ -14,6 +15,8 @@
                     <label for="addLibelle">Libellé *:</label>
                     <input type="text" id="addLibelle" name="libelle" required>
                 </div>
+                <!-- Error Message Container -->
+                <div id="errorMessage" style="color: red; margin-bottom: 10px; display: none;"></div>
 
                 <div class="form-actions">
                     <button type="button" onclick="closeAddFiliereModal()" class="btn-cancel">Annuler</button>
@@ -101,6 +104,7 @@
     <script th:inline="javascript">
         function openAddFiliereModal() {
             document.getElementById('addFiliereModal').style.display = 'flex';
+            document.getElementById('errorMessage').style.display = 'none'; // Hide error message on modal open
         }
 
         function closeAddFiliereModal() {
@@ -126,10 +130,16 @@
                         closeAddFiliereModal();
                         window.location.reload(); // Reload the page to reflect changes
                     } else {
-                        console.error("Failed to add filière");
+                        // Show error message
+                        response.json().then(data => {
+                            document.getElementById('errorMessage').textContent = data.error;
+                            document.getElementById('errorMessage').style.display = 'block';
+                        });
                     }
                 })
-                .catch(error => console.error("Error adding filière:", error));
+                .catch(error => {
+                    console.error("Error adding filière:", error);
+                });
         });
     </script>
 </div>
