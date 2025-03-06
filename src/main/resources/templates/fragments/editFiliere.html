@@ -1,0 +1,89 @@
+<div th:fragment="editFiliere">
+    <!-- Edit Filiere Modal -->
+    <div id="editFiliereModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditFiliereModal()">&times;</span>
+            <h2>Modifier la Filière</h2>
+            <form id="editFiliereForm">
+                <input type="hidden" id="editFiliereId" name="id">
+
+                <div>
+                    <label for="editCode">Code *:</label>
+                    <input type="text" id="editCode" name="code" required>
+                </div>
+
+                <div>
+                    <label for="editLibelle">Libellé *:</label>
+                    <input type="text" id="editLibelle" name="libelle" required>
+                </div>
+
+                <div>
+                    <label for="editNbrEtudiant">Nombre d'Étudiants:</label>
+                    <input type="number" id="editNbrEtudiant" name="nbrEtudiant" readonly>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" onclick="closeEditFiliereModal()" class="btn-cancel">Annuler</button>
+                    <button type="submit" class="btn-save">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        function openEditFiliereModal(filiereId) {
+            fetch(`/api/filieres/${filiereId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erreur lors de la récupération de la filière');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    document.getElementById('editFiliereId').value = data.id;
+                    document.getElementById('editCode').value = data.code;
+                    document.getElementById('editLibelle').value = data.libelle;
+                    document.getElementById('editNbrEtudiant').value = data.nbrEtudiant;
+                    document.getElementById('editFiliereModal').style.display = 'flex';
+                })
+                .catch(error => {
+                    console.error("Erreur lors de la récupération de la filière:", error);
+                    alert("Impossible de charger les données de la filière.");
+                });
+        }
+
+        function closeEditFiliereModal() {
+            document.getElementById('editFiliereModal').style.display = 'none';
+            document.getElementById('editFiliereForm').reset();
+        }
+
+        document.getElementById('editFiliereForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const filiereId = document.getElementById('editFiliereId').value;
+            const formData = {
+                code: document.getElementById('editCode').value,
+                libelle: document.getElementById('editLibelle').value,
+            };
+
+            fetch(`/api/filieres/${filiereId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData),
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Erreur lors de la mise à jour de la filière");
+                    }
+                    return response.json();
+                })
+                .then(() => {
+                    closeEditFiliereModal();
+                    window.location.reload();
+                })
+                .catch(error => {
+                    console.error("Erreur lors de la mise à jour de la filière:", error);
+                    alert("Échec de la mise à jour. Veuillez réessayer.");
+                });
+        });
+    </script>
+</div>

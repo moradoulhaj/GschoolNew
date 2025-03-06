@@ -1,0 +1,132 @@
+<div th:fragment="accueil">
+    <h1>Accueil</h1>
+    <p>Bienvenue sur le tableau de bord. Voici quelques statistiques :</p>
+
+    <!-- Charts Container -->
+    <div class="charts-container">
+        <!-- Bar Chart -->
+        <div class="chart">
+            <h2>Nombre d'Étudiants par Filière</h2>
+            <canvas id="barChart"></canvas>
+        </div>
+
+        <!-- Pie Chart -->
+        <div class="chart">
+            <h2>Répartition des Étudiants par Filière</h2>
+            <canvas id="pieChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Include Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Script to Render Charts -->
+    <script th:inline="javascript">
+        // Fetch data for charts
+        fetch('/api/filieres')
+            .then(response => response.json())
+            .then(data => {
+                const labels = data.map(filiere => filiere.libelle);
+                const studentCounts = data.map(filiere => filiere.nbrEtudiant);
+
+                // Bar Chart
+                const barChartCtx = document.getElementById('barChart').getContext('2d');
+                new Chart(barChartCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Nombre d\'Étudiants',
+                            data: studentCounts,
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        },
+                        responsive: true,
+                        maintainAspectRatio: false // Allow custom height
+                    }
+                });
+
+                // Pie Chart
+                const pieChartCtx = document.getElementById('pieChart').getContext('2d');
+                new Chart(pieChartCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Répartition des Étudiants',
+                            data: studentCounts,
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.2)',
+                                'rgba(54, 162, 235, 0.2)',
+                                'rgba(255, 206, 86, 0.2)',
+                                'rgba(75, 192, 192, 0.2)',
+                                'rgba(153, 102, 255, 0.2)',
+                                'rgba(255, 159, 64, 0.2)'
+                            ],
+                            borderColor: [
+                                'rgba(255, 99, 132, 1)',
+                                'rgba(54, 162, 235, 1)',
+                                'rgba(255, 206, 86, 1)',
+                                'rgba(75, 192, 192, 1)',
+                                'rgba(153, 102, 255, 1)',
+                                'rgba(255, 159, 64, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false // Allow custom height
+                    }
+                });
+            })
+            .catch(error => console.error("Error fetching filières data:", error));
+    </script>
+
+    <!-- Styles for Charts -->
+    <style>
+        /* Full viewport height for the charts container */
+        .charts-container {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+            height: calc(100vh - 150px); /* Adjust based on header and padding */
+        }
+
+        /* Each chart takes full height */
+        .chart {
+            flex: 1;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            height: 80%; /* Take full height of the container */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Chart heading */
+        .chart h2 {
+            margin-bottom: 10px;
+            font-size: 1.25rem;
+            color: #333;
+            text-align: center;
+        }
+
+        /* Chart canvas */
+        .chart canvas {
+            width: 100% !important;
+            height: 100% !important;
+            max-height: calc(100% - 40px); /* Adjust for heading and padding */
+        }
+    </style>
+</div>

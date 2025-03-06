@@ -1,0 +1,180 @@
+<div th:fragment="addStudent">
+    <!-- Add Student Modal -->
+    <div id="addStudentModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAddStudentModal()">&times;</span>
+            <h2>Ajouter un Étudiant</h2>
+            <form id="addStudentForm">
+                <div>
+                    <label for="addNom">Nom *:</label>
+                    <input type="text" id="addNom" name="nom" required>
+                </div>
+
+                <div>
+                    <label for="addPrenom">Prénom *:</label>
+                    <input type="text" id="addPrenom" name="prenom" required>
+                </div>
+
+                <div>
+                    <label for="addCne">CNE *:</label>
+                    <input type="text" id="addCne" name="cne" required>
+                </div>
+
+                <div>
+                    <label for="addFiliere">Filière *:</label>
+                    <select id="addFiliere" name="filiere" required>
+                        <option value="">Sélectionner une filière</option>
+                        <!-- Options will be populated dynamically -->
+                    </select>
+                </div>
+
+                <div>
+                    <label for="addPhoto">Photo:</label>
+                    <input type="file" id="addPhoto" name="photo">
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" onclick="closeAddStudentModal()" class="btn-cancel">Annuler</button>
+                    <button type="submit" class="btn-save">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Styles for Modal -->
+    <style>
+        /* Modal Background */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Modal Content */
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 400px;
+            text-align: center;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Close Button */
+        .close {
+            float: right;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: red;
+        }
+
+        /* Form Inputs */
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        /* Buttons */
+        .form-actions {
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .btn-cancel, .btn-save {
+            padding: 10px 15px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .btn-cancel {
+            background: #ccc;
+        }
+
+        .btn-save {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-save:hover {
+            background: #218838;
+        }
+    </style>
+
+    <!-- Script for Add Student Functionality -->
+    <script th:inline="javascript">
+        // Function to fetch filières and populate the dropdown
+        function fetchFilieres() {
+            fetch('/api/filieres')
+                .then(response => response.json())
+                .then(data => {
+                    const filiereDropdown = document.getElementById('addFiliere');
+                    filiereDropdown.innerHTML = '<option value="">Sélectionner une filière</option>';
+
+                    data.forEach(filiere => {
+                        const option = document.createElement('option');
+                        option.value = filiere.id;
+                        option.textContent = filiere.libelle;
+                        filiereDropdown.appendChild(option);
+                    });
+                })
+                .catch(error => console.error("Error fetching filières:", error));
+        }
+
+        // Function to open the add student modal
+        function openAddStudentModal() {
+            // Fetch filières and populate the dropdown
+            fetchFilieres();
+
+            // Display the modal
+            document.getElementById('addStudentModal').style.display = 'flex';
+        }
+
+        // Function to close the add student modal
+        function closeAddStudentModal() {
+            document.getElementById('addStudentModal').style.display = 'none';
+        }
+
+        // Handle form submission
+        document.getElementById('addStudentForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const formData = {
+                nom: document.getElementById('addNom').value,
+                prenom: document.getElementById('addPrenom').value,
+                cne: document.getElementById('addCne').value,
+                filiere: { id: document.getElementById('addFiliere').value },
+                photo: document.getElementById('addPhoto').files[0]?.name || '',
+            };
+
+            fetch('/api/students', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData),
+            })
+                .then(response => {
+                    if (response.ok) {
+                        closeAddStudentModal();
+                        window.location.reload(); // Reload the page to reflect changes
+                    } else {
+                        console.error("Failed to add student");
+                    }
+                })
+                .catch(error => console.error("Error adding student:", error));
+        });
+    </script>
+</div>

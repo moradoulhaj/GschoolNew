@@ -1,10 +1,12 @@
-package com.gschool.controller;
+package com.gschool.controller.web;
 
 import com.gschool.entities.Filiere;
 import com.gschool.service.FiliereService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -17,8 +19,9 @@ public class FiliereController {
     }
 
     @GetMapping
-    public List<Filiere> getAllFilieres() {
-        return filiereService.getAllFilieres();
+    public ResponseEntity<List<Filiere>> getAllFilieres() {
+        List<Filiere> filieres = filiereService.getAllFilieres();
+        return new ResponseEntity<>(filieres, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
@@ -28,12 +31,13 @@ public class FiliereController {
     }
 
     @PostMapping
-    public Filiere addFiliere(@RequestBody Filiere filiere) {
-        return filiereService.addFiliere(filiere);
+    public ResponseEntity<Filiere> addFiliere(@Valid @RequestBody Filiere filiere) {
+        Filiere newFiliere = filiereService.addFiliere(filiere);
+        return new ResponseEntity<>(newFiliere, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Filiere> updateFiliere(@PathVariable Integer id, @RequestBody Filiere filiereDetails) {
+    public ResponseEntity<Filiere> updateFiliere(@PathVariable Integer id, @Valid @RequestBody Filiere filiereDetails) {
         Filiere updatedFiliere = filiereService.updateFiliere(id, filiereDetails);
         return updatedFiliere != null ? ResponseEntity.ok(updatedFiliere) : ResponseEntity.notFound().build();
     }

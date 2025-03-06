@@ -1,0 +1,22 @@
+<!-- fragments/sidebar.html -->
+<div th:fragment="sidebar">
+    <div class="sidebar">
+        <!-- Gestion d'école Section -->
+        <div class="sidebar-section">
+            <h2>Gestion d'école</h2>
+            <ul>
+                <li><a th:href="@{/dashboard/accueil}">Accueil</a></li>
+                <li><a th:href="@{/dashboard/filieres}">Filières</a></li>
+                <li><a th:href="@{/dashboard/etudiant}">Étudiants</a></li>
+            </ul>
+        </div>
+
+        <!-- Administration Section -->
+        <div class="sidebar-section">
+            <h2>Administration</h2>
+            <ul>
+                <li><a th:href="@{/dashboard/utilisateurs}">Utilisateurs</a></li>
+            </ul>
+        </div>
+    </div>
+</div>

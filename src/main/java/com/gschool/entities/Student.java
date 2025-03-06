@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 @Table(name = "student")
 public class Student {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     @Column(name = "id", nullable = false)
     private Integer id;
 
@@ -18,7 +20,7 @@ public class Student {
     @Column(name = "cne", nullable = false, length = 50)
     private String cne;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "filiere_id")
     private Filiere filiere;
 
