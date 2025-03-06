@@ -353,3 +353,11 @@ label {
 .users {
     background: #ff5733; /* Red */
 }
+/* active class */
+
+.sidebar a.active {
+    background-color: #28a745; /* Green background */
+    color: white; /* White text */
+    border-radius: 5px; /* Rounded corners */
+    padding: 5px 10px; /* Padding for better appearance */
+}
