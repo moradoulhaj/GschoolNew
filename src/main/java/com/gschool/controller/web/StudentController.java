@@ -49,18 +49,25 @@ public class StudentController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateStudent(@PathVariable Integer id, @Valid @RequestBody Student studentDetails) {
-        // Check if the CNE already exists in the database before updating
-        if (studentService.existsByCne(studentDetails.getCne())) {
+        // Fetch the existing student by ID
+        Student existingStudent = studentService.getStudentById(id);
+        if (existingStudent == null) {
+            return ResponseEntity.notFound().build(); // Student not found
+        }
+
+        // Check if the CNE already exists for another student
+        if (!existingStudent.getCne().equals(studentDetails.getCne()) &&
+                studentService.existsByCne(studentDetails.getCne())) {
             // Return an error message wrapped in ResponseEntity
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("error", "CNE already exists.");
             return ResponseEntity.badRequest().body(errorResponse);
         }
 
+        // Update the student
         Student updatedStudent = studentService.updateStudent(id, studentDetails);
-        return updatedStudent != null ? ResponseEntity.ok(updatedStudent) : ResponseEntity.notFound().build();
+        return ResponseEntity.ok(updatedStudent);
     }
-
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteStudent(@PathVariable Integer id) {
         studentService.deleteStudent(id);

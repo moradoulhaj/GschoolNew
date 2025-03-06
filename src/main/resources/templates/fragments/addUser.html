@@ -24,7 +24,7 @@
                     <label for="addPassword">Mot de passe *:</label>
                     <input type="password" id="addPassword" name="password" required>
                 </div>
-
+                <div id="addUserError" class="error-message" style="display: none; color: red;"></div>
                 <div class="form-actions">
                     <button type="button" onclick="closeAddUserModal()" class="btn-cancel">Annuler</button>
                     <button type="submit" class="btn-save">Enregistrer</button>
@@ -141,10 +141,18 @@
                         closeAddUserModal();
                         window.location.reload(); // Reload the page to reflect changes
                     } else {
-                        console.error("Failed to add user");
+                        // Parse the error response
+                        return response.json().then(data => {
+                            throw new Error(data.error || "Failed to add user.");
+                        });
                     }
                 })
-                .catch(error => console.error("Error adding user:", error));
-        });
-    </script>
+                .catch(error => {
+                    console.error("Error adding user:", error);
+                    // Display the error message in the modal
+                    const errorMessage = document.getElementById('addUserError');
+                    errorMessage.textContent = error.message;
+                    errorMessage.style.display = 'block';
+                });
+        });    </script>
 </div>

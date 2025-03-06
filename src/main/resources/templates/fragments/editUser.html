@@ -27,6 +27,9 @@
                     <input type="password" id="editUserPassword" name="password" required>
                 </div>
 
+                <!-- Error Message Container -->
+                <div id="editUserError" class="error-message" style="display: none; color: red;"></div>
+
                 <div class="form-actions">
                     <button type="button" onclick="closeEditUserModal()" class="btn-cancel">Annuler</button>
                     <button type="submit" class="btn-save">Enregistrer</button>
@@ -135,36 +138,44 @@
         function closeEditUserModal() {
             document.getElementById('editUserModal').style.display = 'none';
             document.getElementById('editUserForm').reset();
+            // Clear the error message when closing the modal
+            document.getElementById('editUserError').style.display = 'none';
+            document.getElementById('editUserError').textContent = '';
         }
 
         document.getElementById('editUserForm').addEventListener('submit', function (event) {
             event.preventDefault();
+
             const userId = document.getElementById('editUserId').value;
             const formData = {
                 nom: document.getElementById('editUserNom').value,
                 prenom: document.getElementById('editUserPrenom').value,
                 login: document.getElementById('editUserLogin').value,
-                password: document.getElementById('editUserPassword').value
+                password: document.getElementById('editUserPassword').value,
             };
 
             fetch(`/api/users/${userId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
+                body: JSON.stringify(formData),
             })
                 .then(response => {
-                    if (!response.ok) {
-                        throw new Error("Erreur lors de la mise à jour de l'utilisateur");
+                    if (response.ok) {
+                        closeEditUserModal();
+                        window.location.reload(); // Reload the page to reflect changes
+                    } else {
+                        // Parse the error response
+                        return response.json().then(data => {
+                            throw new Error(data.error || "Failed to update user.");
+                        });
                     }
-                    return response.json();
-                })
-                .then(() => {
-                    closeEditUserModal();
-                    window.location.reload();
                 })
                 .catch(error => {
-                    console.error("Erreur lors de la mise à jour de l'utilisateur:", error);
-                    alert("Échec de la mise à jour. Veuillez réessayer.");
+                    console.error("Error updating user:", error);
+                    // Display the error message in the modal
+                    const errorMessage = document.getElementById('editUserError');
+                    errorMessage.textContent = error.message;
+                    errorMessage.style.display = 'block';
                 });
         });
     </script>

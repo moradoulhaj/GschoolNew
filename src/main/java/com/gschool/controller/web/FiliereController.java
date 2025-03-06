@@ -46,20 +46,28 @@ public class FiliereController {
         Filiere newFiliere = filiereService.addFiliere(filiere);
         return new ResponseEntity<>(newFiliere, HttpStatus.CREATED);
     }
+
     @PutMapping("/{id}")
     public ResponseEntity<?> updateFiliere(@PathVariable Integer id, @Valid @RequestBody Filiere filiereDetails) {
-        // Check if the code already exists in the database before updating
-        if (filiereService.existsByCode(filiereDetails.getCode())) {
+        // Fetch the existing filière by ID
+        Filiere existingFiliere = filiereService.getFiliereById(id);
+        if (existingFiliere == null) {
+            return ResponseEntity.notFound().build(); // Filière not found
+        }
+
+        // Check if the code already exists for another filière
+        if (!existingFiliere.getCode().equals(filiereDetails.getCode()) &&
+                filiereService.existsByCode(filiereDetails.getCode())) {
             // Return an error message wrapped in ResponseEntity
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("error", "Code already exists.");
             return ResponseEntity.badRequest().body(errorResponse);
         }
 
+        // Update the filière
         Filiere updatedFiliere = filiereService.updateFiliere(id, filiereDetails);
-        return updatedFiliere != null ? ResponseEntity.ok(updatedFiliere) : ResponseEntity.notFound().build();
+        return ResponseEntity.ok(updatedFiliere);
     }
-
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteFiliere(@PathVariable Integer id) {
         filiereService.deleteFiliere(id);

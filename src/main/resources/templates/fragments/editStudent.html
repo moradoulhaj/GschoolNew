@@ -4,7 +4,7 @@
         <div class="modal-content">
             <span class="close" onclick="closeEditModal()">&times;</span>
             <h2>Modifier un étudiant</h2>
-            <form id="editForm" enctype="multipart/form-data">
+            <form id="editForm">
                 <input type="hidden" id="editId" name="id">
 
                 <div>
@@ -31,7 +31,7 @@
 
                 <div>
                     <label for="editPhoto">Photo :</label>
-                    <input type="file" id="editPhoto" name="photo" accept="image/*">
+                    <input type="file" id="editPhoto" name="photo">
                 </div>
 
                 <!-- Error Message Display -->
@@ -47,76 +47,93 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
+            // Attach the form submission handler
             document.getElementById("editForm").addEventListener("submit", function (event) {
                 event.preventDefault();
                 updateStudent();
             });
         });
 
+        // Function to open the edit modal and populate the form
         function openEditModal(studentId) {
-            fetchFilieres(); // Fetch filières to populate the dropdown
+            // Fetch both student data and filières simultaneously
+            Promise.all([
+                fetch(`/api/students/${studentId}`).then(response => response.json()),
+                fetch('/api/filieres').then(response => response.json())
+            ])
+                .then(([studentData, filieresData]) => {
+                    console.log("Fetched student data:", studentData); // Debugging line
+                    console.log("Fetched filières data:", filieresData); // Debugging line
 
-            fetch(`/api/students/${studentId}`)
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('editId').value = data.id;
-                    document.getElementById('editNom').value = data.nom;
-                    document.getElementById('editPrenom').value = data.prenom;
-                    document.getElementById('editCne').value = data.cne;
+                    // Populate form fields
+                    document.getElementById('editId').value = studentData.id;
+                    document.getElementById('editNom').value = studentData.nom;
+                    document.getElementById('editPrenom').value = studentData.prenom;
+                    document.getElementById('editCne').value = studentData.cne;
 
-                    // Set the selected filière in the dropdown
-                    const filiereDropdown = document.getElementById('editFiliere');
-                    filiereDropdown.value = data.filiere.id; // Set the selected filière by ID
-
-                    document.getElementById('editModal').style.display = 'flex';
-                })
-                .catch(error => console.error("Erreur lors de la récupération de l'étudiant", error));
-        }
-
-        function fetchFilieres() {
-            fetch('/api/filieres')
-                .then(response => response.json())
-                .then(data => {
+                    // Populate the filière dropdown
                     const filiereDropdown = document.getElementById('editFiliere');
                     filiereDropdown.innerHTML = '<option value="">Sélectionner une filière</option>';
-                    data.forEach(filiere => {
+                    filieresData.forEach(filiere => {
                         const option = document.createElement('option');
-                        option.value = filiere.id;
-                        option.textContent = filiere.libelle;
+                        option.value = filiere.id; // Use filiere.id as the value
+                        option.textContent = filiere.libelle; // Use filiere.libelle as the display text
                         filiereDropdown.appendChild(option);
                     });
+
+                    // Set the selected filière in the dropdown
+                    filiereDropdown.value = studentData.filiere.id; // Set the selected filière by ID
+
+                    // Display the modal
+                    document.getElementById('editModal').style.display = 'flex';
                 })
-                .catch(error => console.error("Erreur lors de la récupération des filières", error));
+                .catch(error => {
+                    console.error("Erreur lors de la récupération des données", error);
+                    document.getElementById('editStudentError').style.display = 'block';
+                    document.getElementById('editStudentError').textContent = "Erreur lors de la récupération des données.";
+                });
         }
 
+        // Function to close the edit modal
         function closeEditModal() {
             document.getElementById('editModal').style.display = 'none';
             document.getElementById('editStudentError').style.display = 'none';
             document.getElementById('editStudentError').textContent = '';
         }
 
+        // Function to update student data
         function updateStudent() {
-            const formData = new FormData(document.getElementById("editForm"));
             const studentId = document.getElementById("editId").value;
+
+            // Construct the JSON object
+            const formData = {
+                id: studentId,
+                nom: document.getElementById('editNom').value,
+                prenom: document.getElementById('editPrenom').value,
+                cne: document.getElementById('editCne').value,
+                filiere: {id: document.getElementById('editFiliere').value},
+                photo: document.getElementById('editPhoto').files[0]?.name || '', // Send the file name only
+            };
 
             fetch(`/api/students/${studentId}`, {
                 method: 'PUT',
-                body: formData
+                headers: {'Content-Type': 'application/json'}, // Set Content-Type to JSON
+                body: JSON.stringify(formData), // Send data as JSON
             })
-                .then(response => response.json().then(data => ({status: response.status, body: data})))
-                .then(({status, body}) => {
-                    if (status === 200 || status === 201) {
+                .then(response => {
+                    if (response.ok) {
                         closeEditModal();
-                        window.location.reload();
+                        window.location.reload(); // Reload the page to reflect changes
                     } else {
-                        document.getElementById('editStudentError').style.display = 'block';
-                        document.getElementById('editStudentError').textContent = body.error || "Erreur lors de la mise à jour de l'étudiant.";
+                        return response.json().then(data => {
+                            throw new Error(data.error || "Erreur lors de la mise à jour de l'étudiant.");
+                        });
                     }
                 })
                 .catch(error => {
                     console.error("Erreur lors de la mise à jour", error);
                     document.getElementById('editStudentError').style.display = 'block';
-                    document.getElementById('editStudentError').textContent = "Erreur lors de la mise à jour de l'étudiant.";
+                    document.getElementById('editStudentError').textContent = error.message;
                 });
         }
     </script>
