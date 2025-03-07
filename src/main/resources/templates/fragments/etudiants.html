@@ -27,8 +27,9 @@
                 <td th:text="${etudiant.prenom}">John</td>
                 <td th:text="${etudiant.cne}">A123456</td>
                 <td th:text="${etudiant.filiere.libelle}">Informatique</td>
-                <td><img th:src="${etudiant.photo}" alt="Photo" width="50"></td>
                 <td>
+                    <img th:if="${etudiant.photo}" th:src="@{'/' + ${etudiant.photo}}" alt="Photo" width="50">                    <span th:unless="${etudiant.photo}">No photo</span>
+                </td>                <td>
                     <!-- Edit Button -->
                     <button class="btn btn-edit" th:onclick="'openEditModal(' + ${etudiant.id} + ')'">Edit</button>
                     <!-- Delete Button -->

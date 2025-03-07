@@ -4,7 +4,7 @@
         <div class="modal-content">
             <span class="close" onclick="closeEditModal()">&times;</span>
             <h2>Modifier un étudiant</h2>
-            <form id="editForm">
+            <form id="editForm" enctype="multipart/form-data">
                 <input type="hidden" id="editId" name="id">
 
                 <div>
@@ -24,7 +24,7 @@
 
                 <div>
                     <label for="editFiliere">Filière *:</label>
-                    <select id="editFiliere" name="filiere" required>
+                    <select id="editFiliere" name="filiere.id" required>
                         <option value="">Sélectionner une filière</option>
                     </select>
                 </div>
@@ -105,20 +105,24 @@
         function updateStudent() {
             const studentId = document.getElementById("editId").value;
 
-            // Construct the JSON object
-            const formData = {
-                id: studentId,
-                nom: document.getElementById('editNom').value,
-                prenom: document.getElementById('editPrenom').value,
-                cne: document.getElementById('editCne').value,
-                filiere: {id: document.getElementById('editFiliere').value},
-                photo: document.getElementById('editPhoto').files[0]?.name || '', // Send the file name only
-            };
+            // Create a FormData object
+            const formData = new FormData();
+            formData.append('id', studentId);
+            formData.append('nom', document.getElementById('editNom').value);
+            formData.append('prenom', document.getElementById('editPrenom').value);
+            formData.append('cne', document.getElementById('editCne').value);
+            formData.append('filiere.id', document.getElementById('editFiliere').value);
 
+            // Append the photo file if it exists
+            const photoFile = document.getElementById('editPhoto').files[0];
+            if (photoFile) {
+                formData.append('photo', photoFile);
+            }
+
+            // Send the FormData to the server
             fetch(`/api/students/${studentId}`, {
                 method: 'PUT',
-                headers: {'Content-Type': 'application/json'}, // Set Content-Type to JSON
-                body: JSON.stringify(formData), // Send data as JSON
+                body: formData, // No need to set Content-Type header for FormData
             })
                 .then(response => {
                     if (response.ok) {

@@ -4,7 +4,7 @@
         <div class="modal-content">
             <span class="close" onclick="closeAddStudentModal()">&times;</span>
             <h2>Ajouter un Étudiant</h2>
-            <form id="addStudentForm">
+            <form id="addStudentForm" enctype="multipart/form-data">
                 <div>
                     <label for="addNomStudent">Nom *:</label>
                     <input type="text" id="addNomStudent" name="nom" required>
@@ -29,9 +29,11 @@
 
                 <div>
                     <label for="addPhoto">Photo:</label>
-                    <input type="file" id="addPhoto" name="photo">
+                    <input type="file" id="addPhoto" name="photo" accept="image/*">
                 </div>
-                <div id="addStudentError" style="color: red; display: none;"></div> <!-- Error Message -->
+
+                <!-- Error Message -->
+                <div id="addStudentError" class="error-message" style="display: none;"></div>
 
                 <div class="form-actions">
                     <button type="button" onclick="closeAddStudentModal()" class="btn-cancel">Annuler</button>
@@ -42,9 +44,15 @@
     </div>
 
     <script th:inline="javascript">
+        // Fetch filières from the server and populate the dropdown
         function fetchFilieres() {
             fetch('/api/filieres')
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erreur lors du chargement des filières.');
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     const filiereDropdown = document.getElementById('addFiliere');
                     filiereDropdown.innerHTML = '<option value="">Sélectionner une filière</option>';
@@ -56,50 +64,74 @@
                     });
                 })
                 .catch(error => {
-                    document.getElementById('addStudentError').style.display = 'block';
-                    document.getElementById('addStudentError').textContent = "Erreur lors du chargement des filières.";
+                    showError(error.message);
                 });
         }
 
+        // Open the add student modal
         function openAddStudentModal() {
             fetchFilieres();
             document.getElementById('addStudentModal').style.display = 'flex';
         }
 
+        // Close the add student modal
         function closeAddStudentModal() {
             document.getElementById('addStudentModal').style.display = 'none';
+            clearForm();
         }
 
+        // Clear the form and error messages
+        function clearForm() {
+            document.getElementById('addStudentForm').reset();
+            document.getElementById('addStudentError').style.display = 'none';
+            document.getElementById('addStudentError').textContent = '';
+        }
+
+        // Display error messages
+        function showError(message) {
+            const errorElement = document.getElementById('addStudentError');
+            errorElement.style.display = 'block';
+            errorElement.textContent = message;
+        }
+
+        // Handle form submission
         document.getElementById('addStudentForm').addEventListener('submit', function (event) {
             event.preventDefault();
 
-            const formData = {
-                nom: document.getElementById('addNomStudent').value,
-                prenom: document.getElementById('addPrenomStudent').value,
-                cne: document.getElementById('addCne').value,
-                filiere: { id: document.getElementById('addFiliere').value },
-                photo: document.getElementById('addPhoto').files[0]?.name || '',
-            };
+            // Create a FormData object
+            const formData = new FormData();
 
+            // Add form fields to FormData
+            formData.append('nom', document.getElementById('addNomStudent').value);
+            formData.append('prenom', document.getElementById('addPrenomStudent').value);
+            formData.append('cne', document.getElementById('addCne').value);
+            formData.append('filiere.id', document.getElementById('addFiliere').value);
+
+            // Add the photo file if provided
+            const photoFile = document.getElementById('addPhoto').files[0];
+            if (photoFile) {
+                formData.append('photo', photoFile);
+            }
+
+            // Send the FormData to the server
             fetch('/api/students', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData),
+                body: formData, // No need to set Content-Type header for FormData
             })
-                .then(response => response.json().then(data => ({ status: response.status, body: data })))
-                .then(({ status, body }) => {
-                    if (status === 200 || status === 201) {
-                        closeAddStudentModal();
-                        window.location.reload(); // Reload the page to reflect changes
-                    } else {
-                        document.getElementById('addStudentError').style.display = 'block';
-                        document.getElementById('addStudentError').textContent = body.error || "Erreur lors de l'ajout de l'étudiant.";
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(errorData => {
+                            throw new Error(errorData.error || "Erreur lors de l'ajout de l'étudiant.");
+                        });
                     }
+                    return response.json();
+                })
+                .then(data => {
+                    closeAddStudentModal();
+                    window.location.reload(); // Reload the page to reflect changes
                 })
                 .catch(error => {
-                    console.error("Error adding student:", error);
-                    document.getElementById('addStudentError').style.display = 'block';
-                    document.getElementById('addStudentError').textContent = "Erreur lors de l'ajout de l'étudiant.";
+                    showError(error.message);
                 });
         });
     </script>

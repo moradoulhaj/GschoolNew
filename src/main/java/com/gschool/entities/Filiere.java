@@ -21,8 +21,16 @@ public class Filiere {
     @Column(name = "nbr_etudiant")
     private Integer nbrEtudiant = 0;
 
+    public Filiere() {
+
+    }
+
     public Integer getId() {
         return id;
+    }
+    // Constructor with ID
+    public Filiere(Integer id) {
+        this.id = id;
     }
 
     public void setId(Integer id) {
