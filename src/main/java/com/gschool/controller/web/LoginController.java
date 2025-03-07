@@ -9,6 +9,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 
 @RestController
 @RequestMapping("/api")
@@ -27,12 +30,31 @@ public class LoginController {
 
         if (user != null) {
             session.setAttribute("user", user); // Store user in session
+
+            // Send Telegram notification after successful login
+            sendTelegramNotification(user.getLogin());
+
             return ResponseEntity.ok(Map.of("message", "Login successful"));
         } else {
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("message", "Invalid login or password"));
         }
+    }
+
+    // Method to send Telegram notification
+    private void sendTelegramNotification(String Login) {
+        String botToken = "7539316932:AAGh-8kkGwF8dVS34il7guUdF0hwM1OlDVI"; // Replace with your bot token
+        String chatId = "7365045675"; // Replace with your chat ID
+        String message = "User " + Login + " has logged in.";
+
+        String telegramApiUrl = "https://api.telegram.org/bot" + botToken + "/sendMessage";
+        String url = telegramApiUrl + "?chat_id=" + chatId + "&text=" + message;
+
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        HttpEntity<String> entity = new HttpEntity<>(null, headers);
+        restTemplate.postForObject(url, entity, String.class);
     }
 
     // Logout endpoint to invalidate session
