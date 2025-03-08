@@ -58,12 +58,6 @@ public class StudentController {
             @RequestParam("filiere.id") Integer filiereId,
             @RequestParam(value = "photo", required = false) MultipartFile photo) {
 
-        System.out.println("Received request to add student:");
-        System.out.println("Nom: " + nom);
-        System.out.println("Prenom: " + prenom);
-        System.out.println("CNE: " + cne);
-        System.out.println("Filiere ID: " + filiereId);
-        System.out.println("Photo: " + (photo != null ? photo.getOriginalFilename() : "None"));
 
         // Check if a student with the same CNE exists
         if (studentService.existsByCne(cne)) {

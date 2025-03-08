@@ -49,7 +49,6 @@ public class StudentService {
             Integer oldFiliereId = null;
             if (student.getFiliere() != null) {
                 oldFiliereId = student.getFiliere().getId();
-                System.out.println("Old Filiere: " + student.getFiliere().getLibelle());
             }
 
             Integer newFiliereId = (studentDetails.getFiliere() != null) ? studentDetails.getFiliere().getId() : null;
@@ -78,9 +77,6 @@ public class StudentService {
             // Save the updated student
             Student updatedStudent = studentRepository.save(student);
 
-            // Debug: Print the returned student's filiere after saving
-            System.out.println("After Save - Student Filiere: " + updatedStudent.getFiliere().getLibelle());
-            System.out.println("After Save - Student Filiere ID: " + updatedStudent.getFiliere().getId());
 
 
 

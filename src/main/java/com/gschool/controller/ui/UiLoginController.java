@@ -7,7 +7,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class UiLoginController {
 
-    @GetMapping("/login")
+    @GetMapping({"/login", "/"})
+
     public String showLoginPage(HttpSession session) {
         // Check if the user is already logged in by checking session
         if (session.getAttribute("user") != null) {
